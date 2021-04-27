@@ -11,11 +11,9 @@ const Routes = () => {
   const { loading, authenticated } = useContext(Context);
 
   if (loading) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
-
+  return <AppRoutes />;
   return authenticated ? <AppRoutes /> : <AuthRoutes />;
 };
 
