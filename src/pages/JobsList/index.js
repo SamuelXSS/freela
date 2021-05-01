@@ -7,15 +7,29 @@ import { icon, cancel, confirm } from '../../assets/img/icons';
 import { commonStyles } from '../../assets/styles/global';
 import styles from './styles';
 
-const JobsList = () => {
+const JobsList = ({ route }) => {
+  const { filter } = route.params;
+
   const [jobs, setJobs] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchJobs() {
-      const { data } = await appApi.get('/jobs').catch((err) => console.log(err));
+      if (filter === 'all') {
+        const { data } = await appApi.get('/jobs').catch((err) => console.log(err));
 
-      setJobs(data);
+        setJobs(data);
+      }
+      if (filter === 'filtered') {
+        const { data } = await appApi
+          .post('/jobs/employees/techs', {
+            dev_type: 'frontend',
+            technologies: [{ name: 'Python' }, { name: 'R' }],
+          })
+          .catch((err) => console.log(err));
+
+        setJobs(data);
+      }
       setLoading(false);
     }
 
@@ -38,9 +52,11 @@ const JobsList = () => {
             <View style={styles.header}>
               <Image source={icon} style={styles.image} />
 
-              <Text style={[commonStyles.titleText, styles.title]}>Usuario teste</Text>
+              <Text style={[commonStyles.titleText, styles.title]}>
+                {job.employers.name}
+              </Text>
               <Text style={[commonStyles.regularLabelText, styles.subtitle]}>
-                Agiota | Cidade {index}
+                {job.employers.role} | Cidade {index}
               </Text>
             </View>
 
@@ -58,6 +74,8 @@ const JobsList = () => {
                 <Text style={[commonStyles.boldLabelText, styles.label]}>Descrição</Text>
                 <View style={styles.textContainer}>
                   <Text style={[commonStyles.regularLabelText, styles.text]}>
+                    Stack: {job.dev_type + '\n'}
+                    Requisitos:{job.technologies + '\n'}
                     {job.description}
                   </Text>
                 </View>
