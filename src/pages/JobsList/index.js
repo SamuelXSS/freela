@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Text, View, ScrollView } from 'react-native';
+import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import appApi from '../../services/appApi';
 
 import { icon, cancel, confirm } from '../../assets/img/icons';
@@ -35,6 +35,14 @@ const JobsList = ({ route }) => {
 
     fetchJobs();
   }, []);
+
+  const handleCandidateJob = (jobId) => {
+    appApi
+      .post(`/jobs/${jobId}/matches`, {
+        employee_id: 1,
+      })
+      .then((res) => console.log(res.data));
+  };
 
   if (loading) {
     return (
@@ -92,8 +100,15 @@ const JobsList = ({ route }) => {
             </View>
 
             <View style={styles.footer}>
-              <Image source={cancel} style={styles.icon} />
-              <Image source={confirm} style={styles.icon} />
+              <TouchableOpacity activeOpacity={0.7}>
+                <Image source={cancel} style={styles.icon} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleCandidateJob(job.id)}
+                activeOpacity={0.7}
+              >
+                <Image source={confirm} style={styles.icon} />
+              </TouchableOpacity>
             </View>
           </View>
         </View>
