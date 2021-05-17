@@ -5,6 +5,7 @@ import { bell, chat } from '../../../assets/img/icons';
 import { commonStyles } from '../../../assets/styles/global';
 import socketIOClient from 'socket.io-client';
 
+
 const ENDPOINT = 'http://192.168.18.19:3001';
 
 const Footer = ({ navigation }) => {
