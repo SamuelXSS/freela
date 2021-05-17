@@ -16,7 +16,7 @@ const Routes = () => {
     );
   }
 
-  return authenticated ? <AppRoutes /> : <AuthRoutes />;
+  return !authenticated ? <AppRoutes /> : <AuthRoutes />;
 };
 
 export default Routes;
