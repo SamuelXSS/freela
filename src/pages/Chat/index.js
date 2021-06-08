@@ -1,78 +1,93 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { RectButton } from 'react-native-gesture-handler';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { Input } from '../../components';
 
-import { colors, commonStyles, img } from '../../assets/styles/global';
+import { colors, img } from '../../assets/styles/global';
 import styles from './styles.js';
+import api from '../../services/appApi';
 
-const Chat = () => {
-  const [email, setEmail] = useState('');
+
+function Chat() {
+  const [text, setText] = useState('');
+  const [messages, setMessages] = useState();
+  const scrollViewRef = useRef();
+
+  useEffect(() => {
+    async function listMessages() {
+      const messages = await api.get('/messages');
+      setMessages(messages.data.messageArray);
+    }
+    setInterval(() => { listMessages() }, 500)
+  }, [])
+
+  const sendMessage = async () => {
+    await api.post('/message', { user: 'You', message: text })
+    setMessages([...messages, {
+      user: 'You',
+      message: text,
+    }])
+  }
+
 
   return (
     <View style={styles.container}>
       <View style={styles.formContainer}>
         <Image source={img.logo} style={styles.logo} />
+        <View style={styles.header}>
+          <Icon
+            name={'long-arrow-alt-left'}
+            size={30}
+            color={colors.white}
+            style={styles.icon}
+          />
+          <View style={styles.avatar}>
+            <Text style={{ color: '#fff' }}>SX</Text>
+          </View>
+          <Text style={{ color: '#fff' }}>Samuel Ximenes</Text>
+        </View>
+        <View style={styles.chatForm}>
+          <ScrollView ref={scrollViewRef}
+            onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+            style={styles.chatContainer}
+          >
+            <View style={styles.yourBaloon}>
+              {messages && messages.map((x, index) => (
+                <View key={index} >
+                  {x.user === 'You' ? (
+                    <Text style={styles.yourMessage}>{x.message}</Text>
+                  ) : (
+                    <View style={styles.otherMessageContainer} >
+                      <Text style={styles.otherMessage}>{x.message}</Text>
+                    </View>
+                  )}
 
-        <View style={styles.ChatForm}>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+        <View style={styles.footer}>
           <Input
             placeholder={{ text: '', color: '' }}
-            text={email}
-            style={{marginBottom: 20}}
-            label='E-mail'
+            text={text}
+            label='Digite uma mensagem'
             color={colors.gray}
-            setText={setEmail}
+            setText={setText}
+            style={{ width: '85%' }}
           />
-
-          <Input
-            placeholder={{ text: '', color: '' }}
-            text={pass}
-            label='Senha'
-            color={colors.gray}
-            setText={setPass}
-            isPass={!visiblePass}
-          />
-          <TouchableOpacity style={styles.showPassButton} onPress={handleVisiblePass}>
+          <TouchableOpacity onPress={sendMessage}>
             <Icon
-              name={visiblePass ? 'eye-slash' : 'eye'}
+              name={'paper-plane'}
               size={20}
-              color={colors.gray}
+              color={'#000'}
+              style={styles.send}
             />
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.buttonsContainer}>
-        <RectButton onPress={signIn} style={commonStyles.primaryButton}>
-          <Text style={commonStyles.buttonText}>
-            {logging ? <ActivityIndicator color='#FFFFFF' size={20} /> : 'Entrar'}
-          </Text>
-        </RectButton>
-        <TouchableOpacity
-          onPress={handlePressRecoverPassword}
-          style={[commonStyles.secondaryButton, styles.forgotPassButton]}
-        >
-          <Text
-            style={[styles.forgotPassText, commonStyles.regularLabelText]}
-          >
-            Esqueci minha senha
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity style={commonStyles.secondaryButton}>
-        <Text style={commonStyles.regularLabelText}>Criar nova conta</Text>
-      </TouchableOpacity>
-
-      <View>
-        <Text style={[commonStyles.boldLabelText, styles.bottomLabel]}>
-          Desenvolvimento
-          </Text>
-        <View style={styles.imgContainer}>
-          <Image source={img.unipamLogo} style={{ width: 120, height: 36 }} />
-        </View>
-      </View>
     </View >
   )
 }
